@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
         deleteTv.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
+                //On long click delete Button
                 clear();
                 updateScreen();
                 return true;
@@ -35,15 +36,18 @@ public class MainActivity extends AppCompatActivity {
 
     }
     public void updateScreen(){
+        //update screen As current Operation
         displayTV.setText(display);
         resultTV.setText(String.valueOf(result));
     }
     public void clear(){
+        //Clear all value display text and current Operator
         display = "";
         currentOperator = "";
     }
 
     public boolean isLastCharacterContainOperator(){
+        //check last input is operator or not
         String lastCharacter = display.substring(display.length()-1);
         if (lastCharacter.equals("+") || lastCharacter.equals("-") ||
                 lastCharacter.equals("×") || lastCharacter.equals("÷") || display.equals("")){
@@ -56,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public double operate(String numberOne, String numberTwo, String operator){
+        //Operation As operator
         switch (operator){
             case "+":
                 return Double.valueOf(numberOne)+Double.valueOf(numberTwo);
@@ -64,15 +69,26 @@ public class MainActivity extends AppCompatActivity {
             case "×":
                 return Double.valueOf(numberOne)*Double.valueOf(numberTwo);
             case "÷":
-                return Double.valueOf(numberOne)/Double.valueOf(numberTwo);
+                try {
+                    return  Double.valueOf(numberOne)/Double.valueOf(numberTwo);
+                }
+                catch (Exception e){
+                    Toast.makeText(this, "Error : "+e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+
         }
         return 0;
     }
     public void getResult(){
+        /*
+        1st Separate String and find two different String
+        Then operate as current operator
+         */
         String[]operation = display.split(Pattern.quote(currentOperator));
         String firstNumber = operation[0];
         String secondNumber = operation[operation.length-1];
         if (result >0){
+            //there are more than two string to operate
             result = operate(String.valueOf(result),secondNumber,currentOperator);
         }
         else {
@@ -83,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickEqual(View view) {
+
         getResult();
     }
     public void onClickNumber(View view) {
