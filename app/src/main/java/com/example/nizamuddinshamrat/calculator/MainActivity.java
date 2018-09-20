@@ -2,6 +2,7 @@ package com.example.nizamuddinshamrat.calculator;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -13,6 +14,9 @@ public class MainActivity extends AppCompatActivity {
     private TextView displayTV,resultTV,deleteTv;
     private String display = "",currentOperator = "";
     private  double result = 0;
+    private double newResult = 0;
+    private boolean pressEqual = false;
+    private String presentEquation = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
         resultTV = findViewById(R.id.resultTv);
         deleteTv = findViewById(R.id.deleteTv);
         displayTV.setText(display);
+        updateScreen();
 
         deleteTv.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -39,11 +44,14 @@ public class MainActivity extends AppCompatActivity {
         //update screen As current Operation
         displayTV.setText(display);
         resultTV.setText(String.valueOf(result));
+
     }
     public void clear(){
         //Clear all value display text and current Operator
         display = "";
         currentOperator = "";
+        result = 0.0;
+        pressEqual = false;
     }
 
     public boolean isLastCharacterContainOperator(){
@@ -63,7 +71,10 @@ public class MainActivity extends AppCompatActivity {
         //Operation As operator
         switch (operator){
             case "+":
-                return Double.valueOf(numberOne)+Double.valueOf(numberTwo);
+
+                    return Double.valueOf(numberOne)+Double.valueOf(numberTwo);
+                //Toast.makeText(this, ""+String.valueOf(Double.valueOf(numberOne)+Double.valueOf(numberTwo)), Toast.LENGTH_SHORT).show();
+
             case "-":
                 return Double.valueOf(numberOne)-Double.valueOf(numberTwo);
             case "×":
@@ -79,43 +90,95 @@ public class MainActivity extends AppCompatActivity {
         }
         return 0;
     }
-    public void getResult(){
+    public void getResult(String cureentLine){
         /*
         1st Separate String and find two different String
         Then operate as current operator
          */
-        String[]operation = display.split(Pattern.quote(currentOperator));
-        String firstNumber = operation[0];
+        String[]operation = cureentLine.split("-|\\+|\\×|\\÷");
         String secondNumber = operation[operation.length-1];
-        if (result >0){
+//        Toast.makeText(this, "Current: "+cureentLine+" Result: "+String.valueOf(result)
+//                +"Second Number: "+secondNumber, Toast.LENGTH_LONG).show();
+
+        if (operation.length >2){
             //there are more than two string to operate
-            result = operate(String.valueOf(result),secondNumber,currentOperator);
+
+                Toast.makeText(this, "Result"+String.valueOf(result)+"\n"
+                        +"Second:"+secondNumber+"\n"+
+                        "Current Operator"+currentOperator, Toast.LENGTH_SHORT).show();
+                newResult = operate(String.valueOf(result),secondNumber,currentOperator);
+                result = newResult;
+
+
+            //Toast.makeText(this, "true", Toast.LENGTH_SHORT).show();
         }
         else {
-            result = operate(operation[0],operation[1],currentOperator);
+            Toast.makeText(this, "Ok", Toast.LENGTH_SHORT).show();
+
+            newResult = operate(operation[0],operation[1],currentOperator);
+            result = newResult;
+            Log.d("Result",String.valueOf(result));
+
+
         }
         resultTV.setText(String.valueOf(result));
-        Toast.makeText(this, ""+operation[operation.length-1], Toast.LENGTH_SHORT).show();
+
     }
 
     public void onClickEqual(View view) {
-
-        getResult();
+        if (!isLastCharacterContainOperator()){
+            pressEqual = true;
+            presentEquation = display;
+            getResult(presentEquation);
+            updateScreen();
+        }
+        else {
+            Toast.makeText(this, "Your Last character is a operator", Toast.LENGTH_SHORT).show();
+        }
     }
     public void onClickNumber(View view) {
         TextView textView = (TextView) view;
         display += textView.getText().toString();
         updateScreen();
+        pressEqual = false;
     }
 
     public void onClickOperator(View view) {
+
         try {
             if (!isLastCharacterContainOperator()){
+
+                //Last character doesn't contain Operator
+
                 TextView textView = (TextView) view;
                 display += textView.getText().toString();
-                currentOperator = textView.getText().toString();
                 updateScreen();
-                getResult();
+                if (!currentOperator.equals("")){
+
+                    //Current operator is = not null
+                    //Toast.makeText(this, ""+display, Toast.LENGTH_LONG).show();
+                    if (!pressEqual){
+
+                            presentEquation = display.substring(0, display.length() - 1);
+                            //Toast.makeText(this, ""+presentEquation+currentOperator, Toast.LENGTH_SHORT).show();
+                            getResult(presentEquation);
+                            updateScreen();
+                            currentOperator = textView.getText().toString();
+                            pressEqual = true;
+                            //Toast.makeText(this, ""+e.getMessage(), Toast.LENGTH_SHORT).show()
+                    }
+                    else {
+                        updateScreen();
+                        currentOperator = textView.getText().toString();
+                    }
+                    // no else
+                }
+                else {
+                    currentOperator = textView.getText().toString();
+                   // pressEqual = false;
+                   // Toast.makeText(this, "Current operator : "+currentOperator, Toast.LENGTH_SHORT).show();
+                }
+
             }
         }
         catch (Exception e){
